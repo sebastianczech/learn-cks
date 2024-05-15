@@ -155,6 +155,61 @@ Commands:
 sudo systemctl restart kubelet
 ```
 
+#### Use Ingress to implement TLS termination for the Service
+
+Links:
+* [Certificates and Certificate Signing Requests](https://kubernetes.io/docs/reference/access-authn-authz/certificate-signing-requests/)
+* [Ingress with TLS](https://kubernetes.io/docs/concepts/services-networking/ingress/#tls)
+* [netshoot: a Docker + Kubernetes network trouble-shooting swiss-army container](https://github.com/nicolaka/netshoot)
+
+Secret with certificate:
+```yaml
+apiVersion: v1
+kind: Secret
+type: kubernetes.io/tls
+metadata:
+  name: seba-tls-certs
+  namespace: seba
+data:
+  tls.crt: |
+    <base64-encoded cert data from file seba.crt>
+  tls.key: |
+    <base64-encoded key data from file seba.key>
+```
+
+Ingress with TLS:
+```yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: seba-tls-ingress
+  namespace: seba
+spec:
+  tls:
+  - hosts:
+      - seba.svc
+    secretName: seba-tls-certs
+  rules:
+  - host: seba.svc
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: seba-svc
+            port:
+              number: 80
+```
+
+Commands:
+```bash
+openssl req -nodes -new -x509 -keyout seba.key -out seba.crt -subj "/CN=seba.svc"
+kubectl run tmp-shell --rm -i --tty --image nicolaka/netshoot
+> curl seba-svc.seba.svc.cluster.local
+> curl -H "Host: seba.svc" http://<ingress-controller-ip>
+```
+
 ### 2 - Cluster Hardening
 
 ### 3 - System Hardening
