@@ -112,9 +112,10 @@ k logs <JOB_FOR_NODE>
 
 #### Turn off profiling
 
-* [](https://kubernetes.io/docs/reference/command-line-tools-reference/kube-apiserver/)
-* [](https://kubernetes.io/docs/reference/command-line-tools-reference/kube-controller-manager/)
-* [](https://kubernetes.io/docs/reference/command-line-tools-reference/kube-scheduler/)
+Links:
+* [kube-apiserver](https://kubernetes.io/docs/reference/command-line-tools-reference/kube-apiserver/)
+* [kube-controller-manager](https://kubernetes.io/docs/reference/command-line-tools-reference/kube-controller-manager/)
+* [kube-scheduler](https://kubernetes.io/docs/reference/command-line-tools-reference/kube-scheduler/)
 
 Files: 
 - `/etc/kubernetes/manifests/kube-apiserver.yaml`
@@ -130,6 +131,23 @@ spec:
 ...
     - --profiling=false
 ...
+```
+
+Commands:
+```bash
+sudo systemctl restart kubelet
+```
+
+#### Kubelet authorization to use webhook mode
+
+Links:
+* [Authorization](https://kubernetes.io/docs/reference/access-authn-authz/authorization/)
+* [Webhook Mode](https://kubernetes.io/docs/reference/access-authn-authz/webhook/)
+
+Changes in `/var/lib/kubelet/config.yaml`:
+```yaml
+authorization:
+  mode: Webhook
 ```
 
 Commands:
