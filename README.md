@@ -8,9 +8,10 @@
 * [Sysdig Documentation Hub](https://docs.sysdig.com/en/)
 * [The Falco Project -Cloud Native Runtime Security](https://falco.org/docs/)
 * [AppArmor Documentation](https://gitlab.com/apparmor/apparmor/-/wikis/Documentation)
-* [CKAD: 2021 tips, vimrc, bashrc and cheatsheet](https://dev.to/marcoieni/ckad-2021-tips-vimrc-bashrc-and-cheatsheet-hp3)
 
-## Tips:
+## Tips
+
+* [CKAD: 2021 tips, vimrc, bashrc and cheatsheet](https://dev.to/marcoieni/ckad-2021-tips-vimrc-bashrc-and-cheatsheet-hp3)
 
 ### Auto completion (`.bashrc`)
 
@@ -31,6 +32,10 @@ set ai # autoindent: when go to new line keep same indentation
 ## Notes
 
 ### 1 - Cluster Setup
+
+* [Network Policies](https://kubernetes.io/docs/concepts/services-networking/network-policies/)
+* [Acqua kube-bench](https://github.com/aquasecurity/kube-bench)
+* [CIS Benchmark](https://www.cisecurity.org/benchmark/kubernetes)
 
 ### 2 - Cluster Hardening
 
