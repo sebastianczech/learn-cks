@@ -8,6 +8,25 @@
 * [Sysdig Documentation Hub](https://docs.sysdig.com/en/)
 * [The Falco Project -Cloud Native Runtime Security](https://falco.org/docs/)
 * [AppArmor Documentation](https://gitlab.com/apparmor/apparmor/-/wikis/Documentation)
+* [CKAD: 2021 tips, vimrc, bashrc and cheatsheet](https://dev.to/marcoieni/ckad-2021-tips-vimrc-bashrc-and-cheatsheet-hp3)
+
+## Tips:
+
+### Auto completion (`.bashrc`)
+
+```
+source <(kubectl completion bash)
+alias k=kubectl
+complete -F __start_kubectl k # autocomplete k
+```
+
+### Vi settings (`.vimrc`)
+
+```
+set nu # set numbers
+set tabstop=2 shiftwidth=2 expandtab # use 2 spaces instead of tab
+set ai # autoindent: when go to new line keep same indentation
+```
 
 ## Notes
 
@@ -22,3 +41,4 @@
 ### 5 - Supply Chain Security
 
 ### 6 - Monitoring, Logging and Runtime Security
+
