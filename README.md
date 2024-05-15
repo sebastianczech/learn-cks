@@ -1,7 +1,8 @@
 # Certified Kubernetes Security Specialist (CKS)
 
-## Links
+## Overview
 
+Links:
 * [Certification - Certified Kubernetes Security Specialist (CKS)](https://training.linuxfoundation.org/certification/certified-kubernetes-security-specialist/)
 * [Open Source Curriculum for CNCF Certification Courses](https://github.com/cncf/curriculum)
 * [Trivy - a comprehensive and versatile security scanner](https://github.com/aquasecurity/trivy)
@@ -11,6 +12,7 @@
 
 ## Tips
 
+Links:
 * [CKAD: 2021 tips, vimrc, bashrc and cheatsheet](https://dev.to/marcoieni/ckad-2021-tips-vimrc-bashrc-and-cheatsheet-hp3)
 
 ### Auto completion (`.bashrc`)
@@ -35,6 +37,7 @@ set ai # autoindent: when go to new line keep same indentation
 
 #### Network policies
 
+Links:
 * [Network Policies](https://kubernetes.io/docs/concepts/services-networking/network-policies/)
 
 Default deny all ingress traffic:
@@ -91,7 +94,8 @@ spec:
 
 #### CIS Benchmark
 
-* [Acqua kube-bench](https://github.com/aquasecurity/kube-bench)
+Links:
+* [Aqua kube-bench](https://github.com/aquasecurity/kube-bench)
 * [CIS Benchmark](https://www.cisecurity.org/benchmark/kubernetes)
 
 Jobs for control plane and workers:
@@ -99,6 +103,38 @@ Jobs for control plane and workers:
 ```bash
 k apply -f https://raw.githubusercontent.com/aquasecurity/kube-bench/main/job-master.yaml
 k apply -f https://raw.githubusercontent.com/aquasecurity/kube-bench/main/job-node.yaml
+
+k get pods
+
+k logs <JOB_FOR_MASTER>
+k logs <JOB_FOR_NODE>
+```
+
+#### Turn off profiling
+
+* [](https://kubernetes.io/docs/reference/command-line-tools-reference/kube-apiserver/)
+* [](https://kubernetes.io/docs/reference/command-line-tools-reference/kube-controller-manager/)
+* [](https://kubernetes.io/docs/reference/command-line-tools-reference/kube-scheduler/)
+
+Files: 
+- `/etc/kubernetes/manifests/kube-apiserver.yaml`
+- `/etc/kubernetes/manifests/kube-controller-manager.yaml`
+- `/etc/kubernetes/manifests/kube-scheduler.yaml`
+
+Changes:
+```yaml
+...
+spec:
+  containers:
+  - command:
+...
+    - --profiling=false
+...
+```
+
+Commands:
+```bash
+sudo systemctl restart kubelet
 ```
 
 ### 2 - Cluster Hardening
