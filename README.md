@@ -210,6 +210,17 @@ kubectl run tmp-shell --rm -i --tty --image nicolaka/netshoot
 > curl -H "Host: seba.svc" http://<ingress-controller-ip>
 ```
 
+#### Validate binaries against the checksum files
+
+Links:
+* [Install and Set Up kubectl on Linux](https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/)
+
+Commands:
+```bash
+curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl.sha256"
+echo "$(cat kubectl.sha256)  kubectl" | sha256sum --check
+```
+
 ### 2 - Cluster Hardening
 
 ### 3 - System Hardening
