@@ -31,6 +31,17 @@ set tabstop=2 shiftwidth=2 expandtab # use 2 spaces instead of tab
 set ai # autoindent: when go to new line keep same indentation
 ```
 
+### Multi node `kind` cluster
+
+Links:
+* [kind - Quick Start](https://kind.sigs.k8s.io/docs/user/quick-start/)
+* [kind - multi-node install with Calico](https://docs.tigera.io/calico/latest/getting-started/kubernetes/kind)
+
+Commands:
+```bash
+kind create cluster --config kind-multi-node.yaml
+```
+
 ## Notes
 
 ### 1 - Cluster Setup
@@ -117,7 +128,7 @@ Links:
 * [kube-controller-manager](https://kubernetes.io/docs/reference/command-line-tools-reference/kube-controller-manager/)
 * [kube-scheduler](https://kubernetes.io/docs/reference/command-line-tools-reference/kube-scheduler/)
 
-Files: 
+Files:
 - `/etc/kubernetes/manifests/kube-apiserver.yaml`
 - `/etc/kubernetes/manifests/kube-controller-manager.yaml`
 - `/etc/kubernetes/manifests/kube-scheduler.yaml`
@@ -219,6 +230,71 @@ Commands:
 ```bash
 curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl.sha256"
 echo "$(cat kubectl.sha256)  kubectl" | sha256sum --check
+```
+
+#### Service accounts permissions
+
+Links:
+* [Service Accounts](https://kubernetes.io/docs/concepts/security/service-accounts/)
+* [Service Account permissions](https://kubernetes.io/docs/reference/access-authn-authz/rbac/#service-account-permissions)
+
+Service account:
+```yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  annotations:
+    kubernetes.io/enforce-mountable-secrets: "true"
+  name: my-serviceaccount
+  namespace: my-namespace
+```
+
+Role:
+```yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  namespace: my-namespace
+  name: pod-and-pod-logs-reader
+rules:
+- apiGroups: [""]
+  resources: ["pods", "pods/log"]
+  verbs: ["get", "list"]
+```
+
+Role binding:
+```yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  creationTimestamp: null
+  name: my-serviceaccount-pod-and-pod-logs-reader
+  namespace: my-namespace
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: pod-and-pod-logs-reader
+subjects:
+- kind: ServiceAccount
+  name: my-serviceaccount
+  namespace: my-namespace
+```
+
+Commands:
+```bash
+kubectl create serviceaccount my-serviceaccount -n my-namespace --dry-run=client -o yaml
+
+kubectl create role pod-and-pod-logs-reader \
+  --verb=get --verb=list \
+  --resource=pods --resource=pods/log \
+  --namespace=my-namespace \
+  --dry-run=client -o yaml
+
+kubectl create rolebinding my-serviceaccount-pod-and-pod-logs-reader \
+  --role=pod-and-pod-logs-reader \
+  --serviceaccount=my-namespace:my-serviceaccount \
+  --namespace=my-namespace \
+  --dry-run=client -o yaml
 ```
 
 ### 2 - Cluster Hardening
