@@ -232,6 +232,8 @@ curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stabl
 echo "$(cat kubectl.sha256)  kubectl" | sha256sum --check
 ```
 
+### 2 - Cluster Hardening
+
 #### Service accounts permissions
 
 Links:
@@ -296,8 +298,6 @@ kubectl create rolebinding my-serviceaccount-pod-and-pod-logs-reader \
   --namespace=my-namespace \
   --dry-run=client -o yaml
 ```
-
-### 2 - Cluster Hardening
 
 ### 3 - System Hardening
 
