@@ -301,6 +301,81 @@ kubectl create rolebinding my-serviceaccount-pod-and-pod-logs-reader \
 
 ### 3 - System Hardening
 
+#### Protect K8s with AppArmor
+
+Links:
+* [Restrict a Container's Access to Resources with AppArmor](https://kubernetes.io/docs/tutorials/security/apparmor/)
+* [AppArmor Documentation](https://gitlab.com/apparmor/apparmor/-/wikis/Documentation)
+* [AppArmor and Kubernetes](https://gitlab.com/apparmor/apparmor/-/wikis/AppArmor-and-Kubernetes)
+* [Manage AppArmor profiles in Kubernetes with kube-apparmor-manager](https://sysdig.com/blog/manage-apparmor-profiles-in-kubernetes-with-kube-apparmor-manager/)
+
+AppArmor profile to deny write:
+```c
+#include <tunables/global>
+
+profile k8s-apparmor-example-deny-write flags=(attach_disconnected) {
+  #include <abstractions/base>
+
+  file,
+
+  # Deny all file writes.
+  deny /** w,
+}
+```
+
+Load profile into all nodes:
+```bash
+# This example assumes that node names match host names, and are reachable via SSH.
+NODES=($(kubectl get nodes -o name))
+
+for NODE in ${NODES[*]}; do ssh $NODE 'sudo apparmor_parser -q <<EOF
+#include <tunables/global>
+
+profile k8s-apparmor-example-deny-write flags=(attach_disconnected) {
+  #include <abstractions/base>
+
+  file,
+
+  # Deny all file writes.
+  deny /** w,
+}
+EOF'
+done
+```
+
+Pod with deny-write profile
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: hello-apparmor
+spec:
+  securityContext:
+    appArmorProfile:
+      type: Localhost
+      localhostProfile: k8s-apparmor-example-deny-write
+  containers:
+  - name: hello
+    image: busybox:1.28
+    command: [ "sh", "-c", "echo 'Hello AppArmor!' && sleep 1h" ]
+```
+
+Other approach using metadata and annotations:
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: hello-restricted
+  annotations:
+    container.apparmor.security.beta.kubernetes.io/hello: localhost/k8s-apparmor-example-deny-write
+spec:
+  containers:
+  - name: hello
+    image: busybox
+    command: [ "sh", "-c", "echo 'Hello AppArmor!' && sleep 1h" ]
+
+```
+
 ### 4 - Minimize Microservice Vulnerabilities
 
 ### 5 - Supply Chain Security
