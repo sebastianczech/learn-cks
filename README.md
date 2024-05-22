@@ -378,6 +378,121 @@ spec:
 
 ### 4 - Minimize Microservice Vulnerabilities
 
+#### Manage sensitive data with secrets
+
+Links:
+* [Secrets](https://kubernetes.io/docs/concepts/configuration/secret/)
+* [Define container environment variables using Secret data](https://kubernetes.io/docs/tasks/inject-data-application/distribute-credentials-secure/#define-container-environment-variables-using-secret-data)
+* [Managing Secrets using kubectl](https://kubernetes.io/docs/tasks/configmap-secret/managing-secret-using-kubectl/)
+
+Encode password:
+```bash
+echo -n '39528$vdg7Jb' | base64
+```
+
+Define secret with base64 encoded password:
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: test-secret
+data:
+  username: bXktYXBw
+  password: Mzk1MjgkdmRnN0pi
+```
+
+Container environment variable with data from secret:
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: env-single-secret
+spec:
+  containers:
+  - name: envars-test-container
+    image: nginx
+    env:
+    - name: SECRET_USERNAME
+      valueFrom:
+        secretKeyRef:
+          name: backend-user
+          key: backend-username
+```
+
+Pod that access the secret through a volume:
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: secret-test-pod
+spec:
+  containers:
+    - name: test-container
+      image: nginx
+      volumeMounts:
+        # name must match the volume name below
+        - name: secret-volume
+          mountPath: /etc/secret-volume
+          readOnly: true
+  # The secret data is exposed to Containers in the Pod through a Volume.
+  volumes:
+    - name: secret-volume
+      secret:
+        secretName: test-secret
+```
+
+Commands:
+```bash
+kubectl create secret generic db-user-pass \
+    --from-literal=username=admin \
+    --from-literal=password='S!B\*d$zDsb='
+
+kubectl create secret generic db-user-pass \
+    --from-file=./username.txt \
+    --from-file=./password.txt
+
+kubectl get secrets
+
+kubectl get secret db-user-pass -o jsonpath='{.data}'
+echo 'UyFCXCpkJHpEc2I9' | base64 --decode
+
+kubectl get secret db-user-pass -o jsonpath='{.data.password}' | base64 --decode
+
+kubectl edit secrets db-user-pass
+```
+
+#### Run pod in secured runtime sandbox
+
+Links:
+* [Runtime Class](https://kubernetes.io/docs/concepts/containers/runtime-class/)
+* [gVisor](https://gvisor.dev/docs/user_guide/quick_start/kubernetes/)
+* [gVisor Addon - instruction](https://github.com/kubernetes/minikube/blob/master/deploy/addons/gvisor/README.md)
+* [Containerd Quick Start](https://gvisor.dev/docs/user_guide/containerd/quick_start/)
+
+Runtime class:
+```yaml
+# RuntimeClass is defined in the node.k8s.io API group
+apiVersion: node.k8s.io/v1
+kind: RuntimeClass
+metadata:
+  # The name the RuntimeClass will be referenced by.
+  # RuntimeClass is a non-namespaced resource.
+  name: myclass 
+# The name of the corresponding CRI configuration
+handler: myconfiguration 
+```
+
+Usage of runtime class in pod:
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mypod
+spec:
+  runtimeClassName: myclass
+  # ...
+```
+
 ### 5 - Supply Chain Security
 
 ### 6 - Monitoring, Logging and Runtime Security
