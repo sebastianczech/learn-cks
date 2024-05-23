@@ -15,6 +15,18 @@ Links:
 Links:
 * [CKAD: 2021 tips, vimrc, bashrc and cheatsheet](https://dev.to/marcoieni/ckad-2021-tips-vimrc-bashrc-and-cheatsheet-hp3)
 
+## Allowed access
+
+* Kubernetes Documentation: 
+  * https://kubernetes.io/docs/ and their subdomains
+  * https://kubernetes.io/blog/ and their subdomains
+* Tools:
+  * Trivy documentation https://aquasecurity.github.io/trivy/
+  * Falco documentation https://falco.org/docs/
+  * etcd documentation https://etcd.io/docs/
+* App Armor:
+  * Documentation https://gitlab.com/apparmor/apparmor/-/wikis/Documentation
+
 ### Auto completion (`.bashrc`)
 
 ```
@@ -494,6 +506,37 @@ spec:
 ```
 
 ### 5 - Supply Chain Security
+
+#### Dockerfile security best practices
+
+Links:
+* [Dockerfile Best Practices](https://github.com/dnaprawa/dockerfile-best-practices)
+* [General best practices for writing Dockerfiles](https://docs.docker.com/develop/develop-images/guidelines/)
+* [Best practices for Dockerfile instructions](https://docs.docker.com/develop/develop-images/instructions/)
+* [Security best practices](https://docs.docker.com/develop/security-best-practices/)
+* [Docker Security Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Docker_Security_Cheat_Sheet.html)
+* [Top 20 Dockerfile best practices](https://sysdig.com/blog/dockerfile-best-practices/)
+
+#### Kubernetes YAML files best practices
+
+Links:
+* [Configuration Best Practices](https://kubernetes.io/docs/concepts/configuration/overview/)
+* [Pod Security Standards](https://kubernetes.io/docs/concepts/security/pod-security-standards/)
+* [Kubernetes Security Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Kubernetes_Security_Cheat_Sheet.html)
+
+#### Scanning images for vulnerabilities
+
+Links:
+* [Trivy](https://aquasecurity.github.io/trivy/)
+
+Commands:
+```bash
+brew install trivy
+
+trivy image python:3.4-alpine
+trivy fs --scanners vuln,secret,misconfig myproject/
+trivy k8s --report summary cluster
+```
 
 ### 6 - Monitoring, Logging and Runtime Security
 
