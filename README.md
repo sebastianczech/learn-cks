@@ -628,3 +628,27 @@ spec:
 
 ### 6 - Monitoring, Logging and Runtime Security
 
+#### Threat detection with Falco
+
+Links:
+* [The Falco Project -Cloud Native Runtime Security](https://falco.org/docs/)
+* [Falco](https://github.com/falcosecurity/falco)
+* [Kubernetes Security Tools: Falco](https://medium.com/@noah_h/kubernetes-security-tools-falco-e873831f3d3d)
+* [Default and local rules files](https://falco.org/docs/rules/default-custom/)
+* [Default rules](https://falco.org/docs/reference/rules/default-rules/)
+
+Custom rule:
+```yml
+- rule: Detect privilege escalation in /tmp
+  desc: Detect privilege escalationof binaries executed in /tmp
+  condition: >
+    evt.type = setresuid and evt.dir=> and
+    proc.exepath startswith /tmp/
+  output: "The binary %proc.name has tried to escalate privileges: %evt.args"
+  priority: debug
+```
+
+Commands:
+```bash
+falco -r /path/to/my/rules1.yaml -r /path/to/my/rules2.yaml
+```
