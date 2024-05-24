@@ -538,5 +538,93 @@ trivy fs --scanners vuln,secret,misconfig myproject/
 trivy k8s --report summary cluster
 ```
 
+#### Automate image vulnerability scanning
+
+Links:
+* [Admission Controllers Reference](https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/)
+* [Trivy Operator](https://github.com/devopstales/trivy-operator)
+* [Using Kubernetes Admission Controllers](https://medium.com/@AbhijeetKasurde/using-kubernetes-admission-controllers-1e5ba5cc30c0)
+* [Kubernetes Security Tools: OPA Gatekeeper & Trivy](https://medium.com/@noah_h/kubernetes-security-tools-opa-gatekeeper-trivy-5b613eb387ff)
+* [Adding Trivy Scanner as custom Admission Controller](https://calvarado04.com/image-policy-webhooks-on-kubernetes-image-scanner-admission-controller/)
+* [Certified Kubernetes Security Specialist (CKS) Preparation Part 7 — Supply Chain Security](https://jonathan18186.medium.com/certified-kubernetes-security-specialist-cks-preparation-part-7-supply-chain-security-9cf62c34cf6a)
+* [Trivy Kubernetes Admission webhook](https://github.com/mmul-it/trivy-admission-webhook)
+
+Image policy webhook:
+```yaml
+apiVersion: apiserver.config.k8s.io/v1
+kind: AdmissionConfiguration
+plugins:
+  - name: ImagePolicyWebhook
+    path: /etc/kubernetes/admission-control/imagepolicyconfig.yaml
+```
+
+Image policy config:
+```yaml
+imagePolicy:
+  kubeConfigFile: /etc/kubernetes/admission-control/trivy-scanner.kubeconfig
+  allowTTL: 50
+  denyTTL: 50
+  retryBackoff: 500
+  defaultAllow: true
+```
+
+kubeconfig:
+```yaml
+apiVersion: v1
+kind: Config
+clusters:
+- cluster:
+    server: https://trivy-scanner<my-domain>/scan
+  name: okd
+users:
+- name: admin
+  user: {}
+preferences: {}
+contexts:
+- context:
+    cluster: okd
+    user: admin
+  name: admin
+current-context: admin
+```
+
+kube-api static pod:
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  annotations:
+    kubeadm.kubernetes.io/kube-apiserver.advertise-address.endpoint: 192.168.124.20:6443
+  creationTimestamp: null
+  labels:
+    component: kube-apiserver
+    tier: control-plane
+  name: kube-apiserver
+  namespace: kube-system
+spec:
+  containers:
+  - command:
+    - kube-apiserver
+    - --advertise-address=192.168.124.20
+    - --allow-privileged=true
+    - --authorization-mode=Node,RBAC
+    - --client-ca-file=/etc/kubernetes/pki/ca.crt
+    - --enable-admission-plugins=NodeRestriction,ImagePolicyWebhook
+    - --admission-control-config-file=/etc/kubernetes/admission-control/image-policy-webhook-conf.yaml
+    [...]
+    volumeMounts:
+    [...]
+    - mountPath: /etc/kubernetes/admission-control
+      name: etc-kubernetes-admission-control
+      readOnly: true
+    [...]
+  volumes:
+  [...]
+  - hostPath:
+      path: /etc/kubernetes/admission-control
+      type: DirectoryOrCreate
+    name: etc-kubernetes-admission-control
+```
+
 ### 6 - Monitoring, Logging and Runtime Security
 
