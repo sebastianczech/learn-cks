@@ -710,3 +710,94 @@ spec:
     securityContext:
       allowPrivilegeEscalation: false
 ```
+
+#### Audit Logging
+
+Links:
+* [Auditing](https://kubernetes.io/docs/tasks/debug/debug-cluster/audit/)
+* [The Ultimate Guide to Audit Logging in Kubernetes: From Setup to Analysis](https://blog.kubesimplify.com/the-ultimate-guide-to-audit-logging-in-kubernetes-from-setup-to-analysis)
+* [Kubernetes Audit Logging](https://docs.sysdig.com/en/docs/sysdig-secure/secure-events/kubernetes-audit-logging/)
+* [How To Monitor Kubernetes Audit Logs](https://logrhythm.com/blog/how-to-monitor-kubernetes-audit-logs/)
+* [How to monitor Kubernetes audit logs](https://www.datadoghq.com/blog/monitor-kubernetes-audit-logs/)
+* [Monitor Audit Logs to Safeguard Your Kubernetes Infrastructure](https://www.crowdsec.net/blog/monitor-audit-logs-safeguard-kubernetes-infrastructure)
+* [kube-apiserver Audit Configuration](https://kubernetes.io/docs/reference/config-api/apiserver-audit.v1/)
+
+`kube-apiserver` flags:
+```
+  - --audit-policy-file=/etc/kubernetes/audit-policy.yaml
+  - --audit-log-path=/var/log/kubernetes/audit/audit.log
+  - --audit-log-maxage=30
+  - --audit-log-maxbackup=1
+```
+
+Example audit policy file `audit-policy.yaml`:
+```yaml
+apiVersion: audit.k8s.io/v1 # This is required.
+kind: Policy
+# Don't generate audit events for all requests in RequestReceived stage.
+omitStages:
+  - "RequestReceived"
+rules:
+  # Log pod changes at RequestResponse level
+  - level: RequestResponse
+    resources:
+    - group: ""
+      # Resource "pods" doesn't match requests to any subresource of pods,
+      # which is consistent with the RBAC policy.
+      resources: ["pods"]
+  # Log "pods/log", "pods/status" at Metadata level
+  - level: Metadata
+    resources:
+    - group: ""
+      resources: ["pods/log", "pods/status"]
+
+  # Don't log requests to a configmap called "controller-leader"
+  - level: None
+    resources:
+    - group: ""
+      resources: ["configmaps"]
+      resourceNames: ["controller-leader"]
+
+  # Don't log watch requests by the "system:kube-proxy" on endpoints or services
+  - level: None
+    users: ["system:kube-proxy"]
+    verbs: ["watch"]
+    resources:
+    - group: "" # core API group
+      resources: ["endpoints", "services"]
+
+  # Don't log authenticated requests to certain non-resource URL paths.
+  - level: None
+    userGroups: ["system:authenticated"]
+    nonResourceURLs:
+    - "/api*" # Wildcard matching.
+    - "/version"
+
+  # Log the request body of configmap changes in kube-system.
+  - level: Request
+    resources:
+    - group: "" # core API group
+      resources: ["configmaps"]
+    # This rule only applies to resources in the "kube-system" namespace.
+    # The empty string "" can be used to select non-namespaced resources.
+    namespaces: ["kube-system"]
+
+  # Log configmap and secret changes in all other namespaces at the Metadata level.
+  - level: Metadata
+    resources:
+    - group: "" # core API group
+      resources: ["secrets", "configmaps"]
+
+  # Log all other resources in core and extensions at the Request level.
+  - level: Request
+    resources:
+    - group: "" # core API group
+    - group: "extensions" # Version of group should NOT be included.
+
+  # A catch-all rule to log all other requests at the Metadata level.
+  - level: Metadata
+    # Long-running requests like watches that fall under this rule will not
+    # generate an audit event in RequestReceived.
+    omitStages:
+      - "RequestReceived"
+```
