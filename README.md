@@ -652,3 +652,61 @@ Commands:
 ```bash
 falco -r /path/to/my/rules1.yaml -r /path/to/my/rules2.yaml
 ```
+
+#### Container Immutability
+
+Links:
+* [Best practices for operating containers - Immutability](https://cloud.google.com/architecture/best-practices-for-operating-containers#immutability)
+* [Configure a Security Context for a Pod or Container](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/)
+* [Improve the security of pods running on Kubernetes](https://medium.com/datamindedbe/improve-the-security-of-pods-on-kubernetes-3e4a81534674)
+
+Run as a non-root user:
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: security-context-demo
+spec:
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 1000
+  containers:
+  - name: sec-ctx-demo
+    image: busybox:1.28
+    command: [ "sh", "-c", "sleep 1h" ]
+    securityContext:
+      runAsNonRoot: true
+      runAsUser: 1000
+```
+
+Read-only root file system:
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: security-context-demo
+spec:
+  containers:
+  - name: sec-ctx-demo
+    image: busybox:1.28
+    command: [ "sh", "-c", "sleep 1h" ]
+    securityContext:
+      readOnlyRootFilesystem: true
+```
+
+Run with allowPrivilegeEscalation=false:
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: security-context-demo
+spec:
+  securityContext:
+    allowPrivilegeEscalation: false
+  containers:
+  - name: sec-ctx-demo
+    image: busybox:1.28
+    command: [ "sh", "-c", "sleep 1h" ]
+    securityContext:
+      allowPrivilegeEscalation: false
+```
