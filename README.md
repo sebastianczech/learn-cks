@@ -294,7 +294,7 @@ subjects:
   namespace: my-namespace
 ```
 
-Commands:
+Create new service account and new role:
 ```bash
 kubectl create serviceaccount my-serviceaccount -n my-namespace --dry-run=client -o yaml
 
@@ -309,6 +309,14 @@ kubectl create rolebinding my-serviceaccount-pod-and-pod-logs-reader \
   --serviceaccount=my-namespace:my-serviceaccount \
   --namespace=my-namespace \
   --dry-run=client -o yaml
+```
+
+Modify existing role:
+```bash
+kubectl -n my-namespace get sa
+kubectl -n my-namespace get rolebindings.rbac.authorization.k8s.io -o yaml
+kubectl -n my-namespace get pod-and-pod-logs-reader -o yaml
+kubectl -n my-namespace edit pod-and-pod-logs-reader
 ```
 
 ### 3 - System Hardening
