@@ -133,6 +133,97 @@ k logs <JOB_FOR_MASTER>
 k logs <JOB_FOR_NODE>
 ```
 
+##### Examples of solution for problems detected by CIS Benchmark
+
+###### Disable anonymous requests to the API server.
+
+Links:
+* [1.2.1 Ensure that the --anonymous-auth argument is set to false](https://www.tenable.com/audits/items/CIS_Kubernetes_v1.6.1_Level_1_Master.audit:ed6e2c11c6cdf4de68f7dda0f49fd8f7)
+* [Set Kubelet Parameters Via A Configuration File](https://kubernetes.io/docs/tasks/administer-cluster/kubelet-config-file/)
+* [Configuring each kubelet in your cluster using kubeadm](https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/kubelet-integration/)
+
+Define authorization in `/var/lib/kubelet/config.yaml`:
+```yaml
+apiVersion: kubelet.config.k8s.io/v1beta1
+kind: KubeletConfiguration
+address: 0.0.0.0
+authentication:
+  anonymous:
+    enabled: false
+  webhook:
+    cacheTTL: 2m0s
+    enabled: true
+  x509:
+    clientCAFile: /etc/kubernetes/pki/ca.crt
+authorization:
+  mode: Webhook
+  webhook:
+    cacheAuthorizedTTL: 5m0s
+    cacheUnauthorizedTTL: 30s
+clusterDNS:
+- 10.96.0.10
+clusterDomain: cluster.local
+cpuManagerReconcilePeriod: 10s
+evictionHard:
+  imagefs.available: 15%
+  memory.available: 100Mi
+  nodefs.available: 10%
+  nodefs.inodesFree: 5%
+healthzBindAddress: 127.0.0.1
+healthzPort: 10248
+kind: KubeletConfiguration
+kubeletCgroups: /systemd/system.slice
+kubeReserved:
+  cpu: 200m
+  memory: 250Mi
+nodeStatusUpdateFrequency: 10s
+resolvConf: /run/systemd/resolve/resolv.conf
+rotateCertificates: true
+runtimeRequestTimeout: 2m0s
+```
+
+Command:
+```bash
+sudo systemctl restart kubelet
+```
+
+Change in `/etc/kubernetes/manifests/kube-apiserver.yaml`:
+```
+--anonymous-auth=false
+```
+
+###### Disable profiling
+
+Links:
+* [1.2.21 Ensure that the --profiling argument is set to false](https://www.tenable.com/audits/items/CIS_Kubernetes_v1.5.1_Level_1.audit:771c311a435fc7fe73f54b59ec6a3c43)
+
+Change in `/etc/kubernetes/manifests/kube-apiserver.yaml`:
+```
+--profiling=false
+```
+
+###### Do not always authorize all requests
+
+Links:
+* [1.2.7 Ensure that the --authorization-mode argument is not set to AlwaysAllow](https://www.tenable.com/audits/items/CIS_Kubernetes_v1.6.1_Level_1_Master.audit:26d0527252183cdd50ed8ddffc5241d9)
+* [Authorization](https://kubernetes.io/docs/reference/access-authn-authz/authorization/)
+
+Change in `/etc/kubernetes/manifests/kube-apiserver.yaml`:
+```
+--authorization-mode=RBAC
+```
+
+###### Enable client authentication on etcd service.
+
+Links:
+* [1.5.2 Ensure that the --client-cert-auth argument is set to true](https://www.tenable.com/audits/items/CIS_Kubernetes_v1.1.0_Level_1.audit:53322ecc4172b9c8acf61fbd62297490)
+* [Role-based access control](https://etcd.io/docs/v3.4/op-guide/authentication/)
+
+Change in `/etc/systemd/system/multi-user.target.wants/etcd.service`:
+```
+--client-cert-auth=true
+```
+
 #### Turn off profiling
 
 Links:
