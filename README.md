@@ -664,7 +664,7 @@ imagePolicy:
   allowTTL: 50
   denyTTL: 50
   retryBackoff: 500
-  defaultAllow: true
+  defaultAllow: true # false, if deny images when image scanning service is not reachable
 ```
 
 kubeconfig:
