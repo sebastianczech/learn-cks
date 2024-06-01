@@ -604,6 +604,11 @@ spec:
   # ...
 ```
 
+Check, if `gVisor` is used:
+```bash
+kubectl exec -n NAMESPACE_NAME POD_NAME -- dmesg
+```
+
 ### 5 - Supply Chain Security
 
 #### Dockerfile security best practices
@@ -633,6 +638,7 @@ Commands:
 brew install trivy
 
 trivy image python:3.4-alpine
+trivy image --severity HIGH,CRITICAL python:3.4-alpine
 trivy fs --scanners vuln,secret,misconfig myproject/
 trivy k8s --report summary cluster
 ```
@@ -750,6 +756,7 @@ Custom rule:
 Commands:
 ```bash
 falco -r /path/to/my/rules1.yaml -r /path/to/my/rules2.yaml
+falco -M 45 -r /path/to/my/rules.yaml
 ```
 
 #### Container Immutability
